@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content="Configuração das propriedades da seleção de anteprojeto" />
+    <title>Propriedades | Seleção de Anteprojeto</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <main class="app-shell detail-page">
+      <aside class="rail" aria-label="Navegação principal">
+        <button type="button" class="rail-button" aria-label="Início"><span aria-hidden="true">⌂</span></button>
+        <button type="button" class="rail-button" aria-label="Planos"><span aria-hidden="true">⚒</span></button>
+        <a class="rail-button" href="index.html" aria-label="Escritórios"><span aria-hidden="true">▦</span></a>
+        <button type="button" class="rail-button" aria-label="Permissões"><span aria-hidden="true">▣</span></button>
+        <button type="button" class="rail-button people-symbol" aria-label="Pessoas"><span aria-hidden="true">♟♟♟</span></button>
+        <a class="rail-button feature-rail-link active" href="selecao-anteprojeto.html" aria-label="Seleção de Anteprojeto" title="Seleção de Anteprojeto" data-tooltip="Seleção de Anteprojeto">
+          <img src="icone-selecao-anteprojeto.png" alt="" aria-hidden="true" />
+        </a>
+      </aside>
+
+      <section class="workspace">
+        <header class="topbar detail-topbar">
+          <a href="index.html" class="home-icon breadcrumb-link" aria-label="Voltar para configurações">⌂</a>
+          <span class="chevron" aria-hidden="true">›</span>
+          <div class="breadcrumb-group">
+            <div class="breadcrumb-item">
+              <a class="breadcrumb breadcrumb-link" href="index.html">Configurações do Escritório</a>
+              <small>PMO-ES</small>
+            </div>
+            <span class="chevron" aria-hidden="true">›</span>
+            <div class="breadcrumb-item">
+              <a class="breadcrumb breadcrumb-link" href="selecao-anteprojeto.html">Configuração</a>
+              <small>Seleção de Anteprojeto</small>
+            </div>
+            <span class="chevron" aria-hidden="true">›</span>
+            <div class="breadcrumb-item">
+              <span class="breadcrumb">GUIA</span>
+            </div>
+          </div>
+        </header>
+
+        <div class="workspace-body properties-body">
+          <section class="config-panel properties-panel" aria-labelledby="properties-title">
+            <header>
+              <h2 id="properties-title">PROPRIEDADES</h2>
+              <button id="toggle-properties" type="button" aria-label="Recolher propriedades" aria-expanded="true">⌃</button>
+            </header>
+
+            <form id="properties-form" class="properties-form">
+              <label class="underline-field">
+                <span>Nome <b>*</b> <i title="Nome da propriedade">?</i></span>
+                <input type="text" name="name" value="Propriedades" required />
+              </label>
+              <label class="underline-field position-field">
+                <span>Posição <b>*</b> <i title="Posição de exibição">?</i></span>
+                <input type="number" name="position" value="1" min="1" required />
+              </label>
+              <label class="underline-field icon-field">
+                <span>Ícone <b>*</b> <i title="Ícone do modelo">?</i></span>
+                <span class="icon-selector"><span aria-hidden="true">▰</span><button type="button" aria-label="Remover ícone">×</button><button type="button" aria-label="Selecionar ícone">⌄</button></span>
+              </label>
+              <label class="underline-field">
+                <span>Peso <b>*</b> <i title="Peso da propriedade">?</i></span>
+                <input type="text" name="weight" value="1" required />
+              </label>
+              <label class="underline-field operation-field">
+                <span>Operação <b>*</b> <i title="Operação aplicada à propriedade">?</i></span>
+                <select name="operation" required><option value="soma">Soma</option><option value="media">Media</option></select>
+              </label>
+
+              <div class="properties-actions">
+                <button type="button" class="action-button">Adicionar propriedade <strong aria-hidden="true">+</strong></button>
+                <button type="button" class="action-button">Adicionar grupo <strong aria-hidden="true">+</strong></button>
+              </div>
+            </form>
+          </section>
+        </div>
+      </section>
+    </main>
+    <script src="script.js"></script>
+  </body>
+</html>

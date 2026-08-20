@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content="Modelos da seleção de anteprojeto" />
+    <title>Seleção de Anteprojeto | Open PMO</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <main class="app-shell detail-page">
+      <aside class="rail" aria-label="Navegação principal">
+        <button type="button" class="rail-button" aria-label="Início"><span aria-hidden="true">⌂</span></button>
+        <button type="button" class="rail-button" aria-label="Planos"><span aria-hidden="true">⚒</span></button>
+        <a class="rail-button" href="index.html" aria-label="Escritórios"><span aria-hidden="true">▦</span></a>
+        <button type="button" class="rail-button" aria-label="Permissões"><span aria-hidden="true">▣</span></button>
+        <button type="button" class="rail-button people-symbol" aria-label="Pessoas"><span aria-hidden="true">♟♟♟</span></button>
+        <a class="rail-button feature-rail-link active" href="selecao-anteprojeto.html" aria-current="page" aria-label="Seleção de Anteprojeto" title="Seleção de Anteprojeto" data-tooltip="Seleção de Anteprojeto">
+          <img src="icone-selecao-anteprojeto.png" alt="" aria-hidden="true" />
+        </a>
+      </aside>
+
+      <section class="workspace">
+        <header class="topbar detail-topbar">
+          <a href="index.html" class="home-icon breadcrumb-link" aria-label="Voltar para configurações">⌂</a>
+          <span class="chevron" aria-hidden="true">›</span>
+          <div class="breadcrumb-group">
+            <div class="breadcrumb-item">
+              <a class="breadcrumb breadcrumb-link" href="index.html">Configurações do Escritório</a>
+              <small>PMO-ES</small>
+            </div>
+            <span class="chevron" aria-hidden="true">›</span>
+            <div class="breadcrumb-item">
+              <span class="breadcrumb">Configuração</span>
+              <small>Seleção de Anteprojeto</small>
+            </div>
+          </div>
+        </header>
+
+        <div class="workspace-body detail-body">
+          <div class="toolbar-row detail-toolbar">
+            <h2>Seleção de Anteprojeto</h2>
+            <div class="detail-actions" aria-label="Opções de visualização">
+              <button id="collapse-all" class="double-arrow" type="button" aria-label="Recolher todos">⌄⌄</button>
+              <button id="expand-all" class="double-arrow selected" type="button" aria-label="Expandir todos">⌃⌃</button>
+              <button id="list-view" type="button" aria-label="Visualização em lista" aria-pressed="false">☰</button>
+              <button id="grid-view" type="button" class="selected" aria-label="Visualização em grade" aria-pressed="true">▦</button>
+              <label><span class="sr-only">Quantidade por página</span>
+                <select aria-label="Quantidade por página"><option>15</option><option selected>30</option><option>60</option></select>
+              </label>
+            </div>
+          </div>
+
+          <section class="config-panel evaluation-panel" aria-labelledby="evaluation-title">
+            <header>
+              <h3 id="evaluation-title">AVALIAÇÃO</h3>
+            </header>
+            <div class="evaluation-fields">
+              <label for="operation">Operação</label>
+              <select id="operation" name="operation">
+                <option value="soma">Soma</option>
+                <option value="media">Media</option>
+              </select>
+            </div>
+          </section>
+
+          <section id="config-panel" class="config-panel models-panel">
+            <header>
+              <h3>GUAIS</h3>
+              <button id="toggle-panel" type="button" aria-label="Recolher modelos" aria-expanded="true">⌃</button>
+            </header>
+            <div id="cards" class="cards-grid model-cards">
+              <a href="propriedades.html" class="config-card model-card">
+                <span class="card-menu" aria-hidden="true">⋮</span><span class="card-icon" aria-hidden="true">▰</span>
+                <span>Propriedades</span><span class="card-count">105</span>
+              </a>
+              <a href="relevancia.html" class="config-card model-card">
+                <span class="card-menu" aria-hidden="true">⋮</span><span class="card-icon" aria-hidden="true">★</span>
+                <span>Relevância</span><span class="card-count">0</span>
+              </a>
+              <button type="button" class="config-card model-card">
+                <span class="card-menu" aria-hidden="true">⋮</span><span class="card-icon" aria-hidden="true">✓</span>
+                <span>Viabilidade</span><span class="card-count">0</span>
+              </button>
+              <button id="add-guide" type="button" class="config-card model-card add-guide-card" aria-label="Adicionar nova guia">
+                <span aria-hidden="true">+</span>
+              </button>
+            </div>
+            <nav class="pagination" aria-label="Paginação">
+              <button type="button" aria-label="Primeira página">«</button><button type="button" aria-label="Página anterior">‹</button>
+              <select aria-label="Página atual"><option>1 of 1</option></select>
+              <button type="button" aria-label="Próxima página">›</button><button type="button" aria-label="Última página">»</button>
+            </nav>
+          </section>
+        </div>
+      </section>
+    </main>
+
+    <dialog id="guide-dialog" class="guide-dialog" aria-labelledby="guide-dialog-title">
+      <form id="guide-form" method="dialog">
+        <h2 id="guide-dialog-title">Adicionar nova guia</h2>
+        <label for="guide-name">Nome da guia</label>
+        <input id="guide-name" name="guideName" type="text" maxlength="50" autocomplete="off" required />
+        <p id="guide-error" class="guide-error" role="alert" aria-live="polite"></p>
+        <div class="dialog-actions">
+          <button id="cancel-guide" type="button" class="secondary-button">Cancelar</button>
+          <button type="submit" class="primary-button">Adicionar</button>
+        </div>
+      </form>
+    </dialog>
+    <script src="script.js"></script>
+  </body>
+</html>

@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content="Painel de configurações do escritório PMO-ES" />
+    <title>Configurações do Escritório | Open PMO</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <main class="app-shell">
+      <aside class="rail" aria-label="Navegação principal">
+        <button type="button" class="rail-button" aria-label="Início"><span aria-hidden="true">⌂</span></button>
+        <button type="button" class="rail-button" aria-label="Planos"><span aria-hidden="true">⚒</span></button>
+        <button type="button" class="rail-button active" aria-label="Escritórios"><span aria-hidden="true">▦</span></button>
+        <button type="button" class="rail-button" aria-label="Permissões"><span aria-hidden="true">▣</span></button>
+        <button type="button" class="rail-button people-symbol" aria-label="Pessoas"><span aria-hidden="true">♟♟♟</span></button>
+        <a class="rail-button feature-rail-link" href="selecao-anteprojeto.html" aria-label="Seleção de Anteprojeto" title="Seleção de Anteprojeto" data-tooltip="Seleção de Anteprojeto">
+          <img src="icone-selecao-anteprojeto.png" alt="" aria-hidden="true" />
+        </a>
+        <button type="button" class="profile-button" aria-label="Perfil do usuário"><span aria-hidden="true">◉</span></button>
+      </aside>
+
+      <aside class="office-sidebar">
+        <header class="office-header">
+          <h1>Escritórios</h1>
+          <span class="clock" aria-hidden="true">◔</span>
+        </header>
+        <nav class="office-list" aria-label="Lista de escritórios">
+          <button type="button" data-office="APEES"><span aria-hidden="true">▦</span>APEES</button>
+          <button type="button" data-office="CESAN"><span aria-hidden="true">▦</span>CESAN</button>
+          <button type="button" data-office="DIO/ES"><span aria-hidden="true">▦</span>DIO/ES</button>
+          <button type="button" data-office="IJSN"><span aria-hidden="true">▦</span>IJSN</button>
+          <button type="button" data-office="PCIES"><span aria-hidden="true">▦</span>PCIES</button>
+          <button type="button" class="selected" data-office="PMO-ES"><span aria-hidden="true">▦</span>PMO-ES</button>
+          <button type="button" data-office="PPES"><span aria-hidden="true">▦</span>PPES</button>
+          <button type="button" data-office="SEP"><span aria-hidden="true">▦</span>SEP</button>
+          <button type="button" data-office="SERD"><span aria-hidden="true">▦</span>SERD</button>
+        </nav>
+      </aside>
+
+      <section class="workspace">
+        <header class="topbar">
+          <span class="home-icon" aria-hidden="true">⌂</span>
+          <span class="chevron" aria-hidden="true">›</span>
+          <span class="breadcrumb">Configurações do Escritório</span>
+        </header>
+
+        <div class="workspace-body">
+          <div class="toolbar-row">
+            <h2 id="selected-office">PMO-ES</h2>
+            <div class="view-controls" aria-label="Opções de visualização">
+              <button id="list-view" type="button" aria-label="Visualização em lista" aria-pressed="false">☰</button>
+              <button id="grid-view" type="button" class="selected" aria-label="Visualização em grade" aria-pressed="true">▦</button>
+              <label>
+                <span class="sr-only">Quantidade por página</span>
+                <select aria-label="Quantidade por página">
+                  <option>15</option><option selected>30</option><option>60</option>
+                </select>
+              </label>
+            </div>
+          </div>
+
+          <section id="config-panel" class="config-panel">
+            <header>
+              <h3>CONFIGURAÇÕES</h3>
+              <button id="toggle-panel" type="button" aria-label="Recolher configurações" aria-expanded="true">⌃</button>
+            </header>
+            <div id="cards" class="cards-grid">
+              <button type="button" class="config-card"><span class="card-icon" aria-hidden="true">⚒</span><span>Modelos de Plano</span></button>
+              <button type="button" class="config-card"><span class="card-icon" aria-hidden="true">▦</span><span>Organizações</span></button>
+              <button type="button" class="config-card"><span class="card-icon" aria-hidden="true">▣</span><span>Permissões</span></button>
+              <button type="button" class="config-card"><span class="card-icon card-people" aria-hidden="true">♟♟♟</span><span>Pessoas</span></button>
+              <a class="config-card" href="selecao-anteprojeto.html">
+                <img class="card-image-icon" src="icone-selecao-anteprojeto.png" alt="" aria-hidden="true" />
+                <span>Seleção de Anteprojeto</span>
+              </a>
+            </div>
+          </section>
+        </div>
+
+        <footer>
+          <span class="seal" aria-hidden="true">✺</span>
+          <p>Open PMO é um software de código aberto fornecido gratuitamente, sem suporte, certificação, manutenção, garantia ou indenização por<br />
+            <strong>Secretaria de Economia e Planejamento - Governo do Estado do Espírito Santo</strong>
+          </p>
+          <span class="about">Sobre <b>◉</b></span>
+        </footer>
+      </section>
+    </main>
+    <script src="script.js"></script>
+  </body>
+</html>
