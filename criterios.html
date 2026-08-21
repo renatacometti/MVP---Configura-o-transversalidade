@@ -154,10 +154,14 @@
             <span>Índice de Ordenação <i title="Índice de ordenação">?</i></span>
             <input type="number" name="selectionIndex" value="3" min="1" />
           </label>
-          <label class="underline-field">
+          <div class="underline-field selection-values-field">
             <span>Possíveis valores <b>*</b> <i title="Valores disponíveis para seleção">?</i></span>
-            <input type="text" name="selectionValues" required />
-          </label>
+            <span class="selection-values-control">
+              <span class="selection-values-summary">2 valores configurados</span>
+              <button type="button" class="add-selection-value" aria-label="Adicionar possível valor">+</button>
+            </span>
+            <input type="hidden" name="selectionValues" value="Valor 1, Valor 2" />
+          </div>
           <label class="underline-field">
             <span>Valor padrão <i title="Valor selecionado inicialmente">?</i></span>
             <input type="text" name="selectionDefault" />
@@ -181,6 +185,37 @@
         </form>
       </section>
     </template>
+
+    <dialog id="possible-values-dialog" class="possible-values-dialog" aria-labelledby="possible-values-title">
+      <form id="possible-values-form" method="dialog">
+        <header>
+          <div>
+            <h2 id="possible-values-title">Possíveis valores</h2>
+            <p>Cadastre o label exibido e sua respectiva nota.</p>
+          </div>
+          <button id="close-possible-values" type="button" aria-label="Fechar possíveis valores">×</button>
+        </header>
+
+        <div class="possible-values-table">
+          <div class="possible-values-table-header" aria-hidden="true">
+            <span>LABEL</span><span>NOTA</span><span>AÇÕES</span>
+          </div>
+          <div id="possible-values-rows" class="possible-values-rows"></div>
+          <div id="possible-values-empty" class="possible-values-empty">
+            <span aria-hidden="true">▦</span>
+            <strong>Nenhum valor adicionado.</strong>
+            <button type="button" class="add-possible-value-button"><b aria-hidden="true">＋</b> Adicionar valor</button>
+          </div>
+        </div>
+
+        <button type="button" class="possible-values-add-link add-possible-value-button"><b aria-hidden="true">＋</b> Adicionar valor</button>
+
+        <footer>
+          <span id="possible-values-count">0 valores</span>
+          <button type="submit" class="complete-possible-values">Concluir</button>
+        </footer>
+      </form>
+    </dialog>
     <script src="script.js"></script>
   </body>
 </html>

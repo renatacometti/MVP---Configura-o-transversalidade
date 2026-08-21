@@ -178,6 +178,108 @@ function directSelectionProperties(container) {
   return [...container.children].filter((child) => child.classList.contains("criteria-selection-property"));
 }
 
+function parsePossibleValues(rawValue) {
+  if (Array.isArray(rawValue)) {
+    return rawValue.map((item) => ({ label: String(item.label || ""), score: String(item.score ?? item.note ?? "0") }));
+  }
+
+  try {
+    const parsedValues = JSON.parse(rawValue || "[]");
+    if (Array.isArray(parsedValues)) {
+      return parsedValues.map((item) => ({ label: String(item.label || ""), score: String(item.score ?? item.note ?? "0") }));
+    }
+  } catch {
+    return String(rawValue || "")
+      .split(/[,;\n]+/)
+      .map((label) => label.trim())
+      .filter(Boolean)
+      .map((label) => ({ label, score: "0" }));
+  }
+
+  return [];
+}
+
+const possibleValuesDialog = document.querySelector("#possible-values-dialog");
+const possibleValuesForm = document.querySelector("#possible-values-form");
+const possibleValuesRows = document.querySelector("#possible-values-rows");
+const possibleValuesEmpty = document.querySelector("#possible-values-empty");
+const possibleValuesCount = document.querySelector("#possible-values-count");
+const closePossibleValuesButton = document.querySelector("#close-possible-values");
+let possibleValuesTargetInput = null;
+let possibleValuesDraft = [];
+
+function renderPossibleValues() {
+  if (!possibleValuesRows || !possibleValuesEmpty || !possibleValuesCount) return;
+  possibleValuesRows.replaceChildren();
+
+  possibleValuesDraft.forEach((possibleValue, index) => {
+    const row = document.createElement("div");
+    row.className = "possible-value-row";
+
+    const drag = document.createElement("span");
+    drag.className = "possible-value-drag";
+    drag.setAttribute("aria-hidden", "true");
+    drag.textContent = "⠿";
+
+    const labelInput = document.createElement("input");
+    labelInput.type = "text";
+    labelInput.value = possibleValue.label;
+    labelInput.placeholder = "Label";
+    labelInput.required = true;
+    labelInput.setAttribute("aria-label", `Label do valor ${index + 1}`);
+
+    const scoreInput = document.createElement("input");
+    scoreInput.type = "number";
+    scoreInput.step = "any";
+    scoreInput.value = possibleValue.score;
+    scoreInput.placeholder = "Nota";
+    scoreInput.required = true;
+    scoreInput.setAttribute("aria-label", `Nota do valor ${index + 1}`);
+
+    const deleteButton = document.createElement("button");
+    deleteButton.type = "button";
+    deleteButton.textContent = "🗑";
+    deleteButton.setAttribute("aria-label", `Excluir valor ${index + 1}`);
+
+    labelInput.addEventListener("input", () => { possibleValuesDraft[index].label = labelInput.value; });
+    scoreInput.addEventListener("input", () => { possibleValuesDraft[index].score = scoreInput.value; });
+    deleteButton.addEventListener("click", () => {
+      possibleValuesDraft.splice(index, 1);
+      renderPossibleValues();
+    });
+
+    row.append(drag, labelInput, scoreInput, deleteButton);
+    possibleValuesRows.append(row);
+  });
+
+  possibleValuesEmpty.hidden = possibleValuesDraft.length > 0;
+  possibleValuesCount.textContent = `${possibleValuesDraft.length} ${possibleValuesDraft.length === 1 ? "valor" : "valores"}`;
+}
+
+function addPossibleValue() {
+  possibleValuesDraft.push({ label: "", score: "0" });
+  renderPossibleValues();
+  possibleValuesRows?.querySelector(".possible-value-row:last-child input")?.focus();
+}
+
+function openPossibleValuesEditor(targetInput) {
+  if (!possibleValuesDialog || !targetInput) return;
+  possibleValuesTargetInput = targetInput;
+  possibleValuesDraft = parsePossibleValues(targetInput.value);
+  renderPossibleValues();
+  possibleValuesDialog.showModal();
+}
+
+document.querySelectorAll(".add-possible-value-button").forEach((button) => button.addEventListener("click", addPossibleValue));
+closePossibleValuesButton?.addEventListener("click", () => possibleValuesDialog?.close());
+possibleValuesForm?.addEventListener("submit", (event) => {
+  event.preventDefault();
+  if (!possibleValuesTargetInput) return;
+  possibleValuesTargetInput.value = JSON.stringify(possibleValuesDraft);
+  possibleValuesTargetInput.dispatchEvent(new Event("change", { bubbles: true }));
+  possibleValuesDialog?.close();
+});
+
 function appendSelectionProperty(container, propertyData = {}) {
   if (!container || !selectionPropertyTemplate) return;
 
@@ -187,13 +289,17 @@ function appendSelectionProperty(container, propertyData = {}) {
   const enabledInput = property.querySelector(".selection-property-enabled");
   const deleteButton = property.querySelector(".delete-selection-property");
   const toggleButton = property.querySelector(".toggle-selection-property");
+  const valuesInput = property.querySelector('[name="selectionValues"]');
+  const valuesSummary = property.querySelector(".selection-values-summary");
+  const addValueButton = property.querySelector(".add-selection-value");
 
   if (!section || !form) return;
 
   form.elements.namedItem("selectionName").value = propertyData.name || "";
   form.elements.namedItem("selectionLabel").value = propertyData.label || "";
   form.elements.namedItem("selectionIndex").value = String(propertyData.index || 3);
-  form.elements.namedItem("selectionValues").value = propertyData.values || "";
+  const storedPossibleValues = propertyData.possibleValues || parsePossibleValues(propertyData.values || "Valor 1, Valor 2");
+  form.elements.namedItem("selectionValues").value = JSON.stringify(storedPossibleValues);
   form.elements.namedItem("selectionDefault").value = propertyData.defaultValue || "";
   form.elements.namedItem("selectionFullLine").checked = propertyData.fullLine !== false;
   form.elements.namedItem("selectionRequired").checked = Boolean(propertyData.required);
@@ -201,7 +307,15 @@ function appendSelectionProperty(container, propertyData = {}) {
   form.elements.namedItem("selectionHelp").value = propertyData.helpText || "";
   if (enabledInput) enabledInput.checked = propertyData.enabled !== false;
 
+  const updateValuesSummary = () => {
+    if (!valuesInput || !valuesSummary) return;
+    const configuredValues = parsePossibleValues(valuesInput.value);
+    valuesSummary.textContent = `${configuredValues.length} ${configuredValues.length === 1 ? "valor configurado" : "valores configurados"}`;
+  };
+
   deleteButton?.addEventListener("click", () => section.remove());
+  addValueButton?.addEventListener("click", () => openPossibleValuesEditor(valuesInput));
+  valuesInput?.addEventListener("change", updateValuesSummary);
   enabledInput?.addEventListener("change", () => section.classList.toggle("is-disabled", !enabledInput.checked));
   toggleButton?.addEventListener("click", () => {
     const expanded = toggleButton.getAttribute("aria-expanded") === "true";
@@ -212,6 +326,7 @@ function appendSelectionProperty(container, propertyData = {}) {
   });
 
   section.classList.toggle("is-disabled", enabledInput ? !enabledInput.checked : false);
+  updateValuesSummary();
   container.append(property);
 }
 
@@ -219,13 +334,15 @@ function collectSelectionProperties(container) {
   return directSelectionProperties(container).map((section) => {
     const form = section.querySelector(".selection-property-form");
     const data = new FormData(form);
+    const possibleValues = parsePossibleValues(String(data.get("selectionValues") || "[]"));
     return {
       type: "selection",
       enabled: section.querySelector(".selection-property-enabled")?.checked !== false,
       name: String(data.get("selectionName") || ""),
       label: String(data.get("selectionLabel") || ""),
       index: Number(data.get("selectionIndex") || 3),
-      values: String(data.get("selectionValues") || ""),
+      values: JSON.stringify(possibleValues),
+      possibleValues,
       defaultValue: String(data.get("selectionDefault") || ""),
       fullLine: data.has("selectionFullLine"),
       required: data.has("selectionRequired"),
