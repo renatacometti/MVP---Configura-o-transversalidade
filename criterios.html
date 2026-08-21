@@ -82,13 +82,19 @@
               </label>
 
               <div class="properties-actions">
-                <button type="button" class="action-button">Adicionar propriedade <strong aria-hidden="true">+</strong></button>
+                <button type="button" class="action-button add-property-button" aria-haspopup="menu" aria-expanded="false">Adicionar propriedade <strong aria-hidden="true">+</strong></button>
                 <button id="add-criteria-group" type="button" class="action-button">Adicionar grupo <strong aria-hidden="true">+</strong></button>
               </div>
             </form>
           </section>
 
           <div id="criteria-groups" class="criteria-groups" aria-live="polite"></div>
+
+          <div class="criteria-page-actions">
+            <button id="save-criterion" type="button" class="save-criterion-button">Salvar</button>
+            <button id="undo-criterion" type="button" class="undo-criterion-button"><span aria-hidden="true">↶</span> Desfazer</button>
+            <p id="criterion-save-status" class="sr-only" role="status" aria-live="polite"></p>
+          </div>
         </div>
       </section>
     </main>
@@ -113,8 +119,65 @@
             <select name="groupOperation" required><option value="soma">Soma</option><option value="media">Média</option></select>
           </label>
           <div class="criteria-group-actions">
-            <button type="button" class="action-button">Adicionar propriedade <strong aria-hidden="true">+</strong></button>
+            <button type="button" class="action-button add-property-button" aria-haspopup="menu" aria-expanded="false">Adicionar propriedade <strong aria-hidden="true">+</strong></button>
           </div>
+        </form>
+      </section>
+    </template>
+
+    <template id="selection-property-template">
+      <section class="criteria-selection-property" aria-label="Propriedade do tipo Seleção">
+        <header>
+          <span class="selection-property-icon" aria-hidden="true">☷</span>
+          <span>( Seleção )</span>
+          <div class="selection-property-controls">
+            <button type="button" class="delete-selection-property" aria-label="Excluir propriedade Seleção">🗑</button>
+            <label class="toggle-control">
+              <span class="sr-only">Propriedade habilitada</span>
+              <input class="selection-property-enabled" type="checkbox" checked aria-label="Habilitar propriedade Seleção" />
+              <span class="toggle-track" aria-hidden="true"><span></span></span>
+            </label>
+            <button type="button" class="toggle-selection-property" aria-label="Recolher propriedade Seleção" aria-expanded="true">⌃</button>
+          </div>
+        </header>
+
+        <form class="selection-property-form">
+          <label class="underline-field">
+            <span>Nome <b>*</b> <i title="Nome da propriedade">?</i></span>
+            <input type="text" name="selectionName" required />
+          </label>
+          <label class="underline-field">
+            <span>Legenda <b>*</b> <i title="Legenda da propriedade">?</i></span>
+            <input type="text" name="selectionLabel" required />
+          </label>
+          <label class="underline-field position-field">
+            <span>Índice de Ordenação <i title="Índice de ordenação">?</i></span>
+            <input type="number" name="selectionIndex" value="3" min="1" />
+          </label>
+          <label class="underline-field">
+            <span>Possíveis valores <b>*</b> <i title="Valores disponíveis para seleção">?</i></span>
+            <input type="text" name="selectionValues" required />
+          </label>
+          <label class="underline-field">
+            <span>Valor padrão <i title="Valor selecionado inicialmente">?</i></span>
+            <input type="text" name="selectionDefault" />
+          </label>
+          <label class="selection-checkbox-field">
+            <input type="checkbox" name="selectionFullLine" checked />
+            <span>Linha inteira</span> <i title="Ocupar a linha inteira">?</i>
+          </label>
+          <label class="selection-checkbox-field">
+            <input type="checkbox" name="selectionRequired" />
+            <span>Obrigatório</span> <i title="Preenchimento obrigatório">?</i>
+          </label>
+          <label class="selection-checkbox-field multiple-selection-field">
+            <input type="checkbox" name="selectionMultiple" />
+            <span>Múltiplas seleções</span> <i title="Permitir mais de uma seleção">?</i>
+          </label>
+          <label class="underline-field selection-help-field">
+            <span>Texto de ajuda <i title="Orientação exibida ao usuário">?</i></span>
+            <input type="text" name="selectionHelp" />
+          </label>
         </form>
       </section>
     </template>

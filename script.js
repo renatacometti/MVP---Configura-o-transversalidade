@@ -171,19 +171,395 @@ document.querySelectorAll(".section-toggle").forEach((toggle) => {
 const addCriteriaGroupButton = document.querySelector("#add-criteria-group");
 const criteriaGroups = document.querySelector("#criteria-groups");
 const criteriaGroupTemplate = document.querySelector("#criteria-group-template");
+const selectionPropertyTemplate = document.querySelector("#selection-property-template");
 
-if (addCriteriaGroupButton && criteriaGroups && criteriaGroupTemplate) {
-  addCriteriaGroupButton.addEventListener("click", () => {
-    const groupNumber = criteriaGroups.children.length + 1;
-    const group = criteriaGroupTemplate.content.cloneNode(true);
-    const section = group.querySelector(".criteria-group-section");
-    const titleInput = group.querySelector(".criteria-group-title");
-    const indexInput = group.querySelector(".criteria-group-index");
+function directSelectionProperties(container) {
+  if (!container) return [];
+  return [...container.children].filter((child) => child.classList.contains("criteria-selection-property"));
+}
 
-    if (section) section.setAttribute("aria-label", `Grupo ${groupNumber}`);
-    if (titleInput) titleInput.value = `Grupo ${groupNumber}`;
-    if (indexInput) indexInput.value = String(groupNumber);
+function appendSelectionProperty(container, propertyData = {}) {
+  if (!container || !selectionPropertyTemplate) return;
 
-    criteriaGroups.append(group);
+  const property = selectionPropertyTemplate.content.cloneNode(true);
+  const section = property.querySelector(".criteria-selection-property");
+  const form = property.querySelector(".selection-property-form");
+  const enabledInput = property.querySelector(".selection-property-enabled");
+  const deleteButton = property.querySelector(".delete-selection-property");
+  const toggleButton = property.querySelector(".toggle-selection-property");
+
+  if (!section || !form) return;
+
+  form.elements.namedItem("selectionName").value = propertyData.name || "";
+  form.elements.namedItem("selectionLabel").value = propertyData.label || "";
+  form.elements.namedItem("selectionIndex").value = String(propertyData.index || 3);
+  form.elements.namedItem("selectionValues").value = propertyData.values || "";
+  form.elements.namedItem("selectionDefault").value = propertyData.defaultValue || "";
+  form.elements.namedItem("selectionFullLine").checked = propertyData.fullLine !== false;
+  form.elements.namedItem("selectionRequired").checked = Boolean(propertyData.required);
+  form.elements.namedItem("selectionMultiple").checked = Boolean(propertyData.multiple);
+  form.elements.namedItem("selectionHelp").value = propertyData.helpText || "";
+  if (enabledInput) enabledInput.checked = propertyData.enabled !== false;
+
+  deleteButton?.addEventListener("click", () => section.remove());
+  enabledInput?.addEventListener("change", () => section.classList.toggle("is-disabled", !enabledInput.checked));
+  toggleButton?.addEventListener("click", () => {
+    const expanded = toggleButton.getAttribute("aria-expanded") === "true";
+    toggleButton.setAttribute("aria-expanded", String(!expanded));
+    toggleButton.setAttribute("aria-label", expanded ? "Expandir propriedade Seleção" : "Recolher propriedade Seleção");
+    toggleButton.textContent = expanded ? "⌄" : "⌃";
+    section.classList.toggle("is-collapsed", expanded);
+  });
+
+  section.classList.toggle("is-disabled", enabledInput ? !enabledInput.checked : false);
+  container.append(property);
+}
+
+function collectSelectionProperties(container) {
+  return directSelectionProperties(container).map((section) => {
+    const form = section.querySelector(".selection-property-form");
+    const data = new FormData(form);
+    return {
+      type: "selection",
+      enabled: section.querySelector(".selection-property-enabled")?.checked !== false,
+      name: String(data.get("selectionName") || ""),
+      label: String(data.get("selectionLabel") || ""),
+      index: Number(data.get("selectionIndex") || 3),
+      values: String(data.get("selectionValues") || ""),
+      defaultValue: String(data.get("selectionDefault") || ""),
+      fullLine: data.has("selectionFullLine"),
+      required: data.has("selectionRequired"),
+      multiple: data.has("selectionMultiple"),
+      helpText: String(data.get("selectionHelp") || "")
+    };
   });
 }
+
+function appendCriteriaGroup(groupData = {}) {
+  if (!criteriaGroups || !criteriaGroupTemplate) return;
+
+  const groupNumber = criteriaGroups.children.length + 1;
+  const group = criteriaGroupTemplate.content.cloneNode(true);
+  const section = group.querySelector(".criteria-group-section");
+  const titleInput = group.querySelector(".criteria-group-title");
+  const indexInput = group.querySelector(".criteria-group-index");
+  const weightInput = group.querySelector('[name="groupWeight"]');
+  const operationInput = group.querySelector('[name="groupOperation"]');
+
+  if (section) section.setAttribute("aria-label", `Grupo ${groupNumber}`);
+  if (titleInput) titleInput.value = groupData.title || `Grupo ${groupNumber}`;
+  if (indexInput) indexInput.value = String(groupData.index || groupNumber);
+  if (weightInput) weightInput.value = groupData.weight || "1";
+  if (operationInput) operationInput.value = groupData.operation || "soma";
+  (groupData.properties || []).forEach((propertyData) => appendSelectionProperty(section, propertyData));
+
+  criteriaGroups.append(group);
+}
+
+if (addCriteriaGroupButton && criteriaGroups && criteriaGroupTemplate) {
+  addCriteriaGroupButton.addEventListener("click", () => appendCriteriaGroup());
+}
+
+const criteriaStorageKey = "anteprojeto-criteria-cards";
+
+function readSavedCriteria() {
+  try {
+    const savedCriteria = JSON.parse(localStorage.getItem(criteriaStorageKey) || "[]");
+    return Array.isArray(savedCriteria) ? savedCriteria : [];
+  } catch {
+    return [];
+  }
+}
+
+const editingCriterionId = new URLSearchParams(window.location.search).get("criterion");
+let editingCriterion = null;
+
+function loadCriterionIntoForm(criterion) {
+  if (!criterion || !propertiesForm || !criteriaGroups) return;
+
+  propertiesForm.elements.namedItem("name").value = criterion.name || "";
+  propertiesForm.elements.namedItem("position").value = String(criterion.position || 1);
+  propertiesForm.elements.namedItem("weight").value = criterion.weight || "1";
+  propertiesForm.elements.namedItem("operation").value = criterion.operation || "soma";
+  const propertiesPanel = propertiesForm.closest(".criteria-properties-panel");
+  directSelectionProperties(propertiesPanel).forEach((property) => property.remove());
+  (criterion.properties || []).forEach((propertyData) => appendSelectionProperty(propertiesPanel, propertyData));
+  criteriaGroups.replaceChildren();
+  (criterion.groups || []).forEach((group) => appendCriteriaGroup(group));
+}
+
+if (editingCriterionId && propertiesForm && criteriaGroups) {
+  editingCriterion = readSavedCriteria().find((criterion) => String(criterion.id) === editingCriterionId) || null;
+  loadCriterionIntoForm(editingCriterion);
+}
+
+function createCriterionCard(criterion) {
+  const criterionUrl = `criterios.html?criterion=${encodeURIComponent(criterion.id)}`;
+  const card = document.createElement("div");
+  card.className = "config-card model-card saved-criterion-card";
+  card.tabIndex = 0;
+  card.setAttribute("role", "link");
+  card.setAttribute("aria-label", `Abrir critério ${criterion.name}`);
+  card.dataset.criterionId = String(criterion.id);
+
+  const menuButton = document.createElement("button");
+  menuButton.type = "button";
+  menuButton.className = "card-menu criterion-card-menu-button";
+  menuButton.setAttribute("aria-label", `Opções do critério ${criterion.name}`);
+  menuButton.setAttribute("aria-haspopup", "menu");
+  menuButton.setAttribute("aria-expanded", "false");
+  menuButton.textContent = "⋮";
+
+  const icon = document.createElement("span");
+  icon.className = "card-icon";
+  icon.setAttribute("aria-hidden", "true");
+  icon.textContent = "⚙";
+
+  const label = document.createElement("span");
+  label.textContent = criterion.name;
+
+  const count = document.createElement("span");
+  count.className = "card-count";
+  const propertiesCount = (criterion.properties?.length || 0) + (criterion.groups || []).reduce((total, group) => total + (group.properties?.length || 0), 0);
+  count.textContent = String(propertiesCount);
+
+  const menu = document.createElement("div");
+  menu.className = "criterion-card-menu";
+  menu.setAttribute("role", "menu");
+  menu.hidden = true;
+
+  const deleteButton = document.createElement("button");
+  deleteButton.type = "button";
+  deleteButton.setAttribute("role", "menuitem");
+  deleteButton.textContent = "Excluir";
+
+  const deleteConfirmation = document.createElement("div");
+  deleteConfirmation.className = "criterion-delete-confirmation";
+  deleteConfirmation.hidden = true;
+
+  const confirmationText = document.createElement("span");
+  confirmationText.textContent = "Excluir este cartão?";
+
+  const confirmDeleteButton = document.createElement("button");
+  confirmDeleteButton.type = "button";
+  confirmDeleteButton.className = "confirm-delete-button";
+  confirmDeleteButton.textContent = "Confirmar exclusão";
+
+  const cancelDeleteButton = document.createElement("button");
+  cancelDeleteButton.type = "button";
+  cancelDeleteButton.className = "cancel-delete-button";
+  cancelDeleteButton.textContent = "Cancelar";
+
+  deleteConfirmation.append(confirmationText, confirmDeleteButton, cancelDeleteButton);
+  menu.append(deleteButton, deleteConfirmation);
+
+  card.addEventListener("click", () => {
+    window.location.href = criterionUrl;
+  });
+  card.addEventListener("keydown", (event) => {
+    if (event.key === "Enter" || event.key === " ") {
+      event.preventDefault();
+      window.location.href = criterionUrl;
+    }
+  });
+  menuButton.addEventListener("click", (event) => {
+    event.stopPropagation();
+    const willOpen = menu.hidden;
+    document.querySelectorAll(".criterion-card-menu").forEach((item) => { item.hidden = true; });
+    document.querySelectorAll(".criterion-card-menu-button").forEach((item) => item.setAttribute("aria-expanded", "false"));
+    menu.hidden = !willOpen;
+    deleteButton.hidden = false;
+    deleteConfirmation.hidden = true;
+    menuButton.setAttribute("aria-expanded", String(willOpen));
+  });
+  deleteButton.addEventListener("click", (event) => {
+    event.stopPropagation();
+    deleteButton.hidden = true;
+    deleteConfirmation.hidden = false;
+  });
+  cancelDeleteButton.addEventListener("click", (event) => {
+    event.stopPropagation();
+    deleteConfirmation.hidden = true;
+    deleteButton.hidden = false;
+  });
+  confirmDeleteButton.addEventListener("click", (event) => {
+    event.stopPropagation();
+
+    try {
+      const remainingCriteria = readSavedCriteria().filter((saved) => String(saved.id) !== String(criterion.id));
+      localStorage.setItem(criteriaStorageKey, JSON.stringify(remainingCriteria));
+      card.remove();
+    } catch {
+      window.alert("Não foi possível excluir o critério.");
+    }
+  });
+  menu.addEventListener("click", (event) => event.stopPropagation());
+
+  card.append(menuButton, icon, label, count, menu);
+  return card;
+}
+
+const addCriterionCard = document.querySelector("#add-criterion-card");
+
+if (cards && addCriterionCard) {
+  readSavedCriteria()
+    .sort((first, second) => Number(first.position) - Number(second.position))
+    .forEach((criterion) => addCriterionCard.before(createCriterionCard(criterion)));
+
+  document.addEventListener("click", () => {
+    document.querySelectorAll(".criterion-card-menu").forEach((menu) => { menu.hidden = true; });
+    document.querySelectorAll(".criterion-card-menu-button").forEach((button) => button.setAttribute("aria-expanded", "false"));
+  });
+}
+
+const saveCriterionButton = document.querySelector("#save-criterion");
+const undoCriterionButton = document.querySelector("#undo-criterion");
+const criterionSaveStatus = document.querySelector("#criterion-save-status");
+
+if (saveCriterionButton && propertiesForm && criteriaGroups) {
+  saveCriterionButton.addEventListener("click", () => {
+    const forms = [propertiesForm, ...criteriaGroups.querySelectorAll(".criteria-group-form"), ...document.querySelectorAll(".selection-property-form")];
+    const invalidForm = forms.find((form) => !form.checkValidity());
+
+    if (invalidForm) {
+      invalidForm.reportValidity();
+      return;
+    }
+
+    const propertiesData = new FormData(propertiesForm);
+    const groups = [...criteriaGroups.querySelectorAll(".criteria-group-form")].map((form) => {
+      const groupData = new FormData(form);
+      const groupSection = form.closest(".criteria-group-section");
+      return {
+        title: String(groupData.get("groupTitle") || ""),
+        index: Number(groupData.get("groupIndex") || 1),
+        weight: String(groupData.get("groupWeight") || "1"),
+        operation: String(groupData.get("groupOperation") || "soma"),
+        properties: collectSelectionProperties(groupSection)
+      };
+    });
+    const criterion = {
+      id: editingCriterion?.id || Date.now(),
+      name: String(propertiesData.get("name") || "").trim(),
+      position: Number(propertiesData.get("position") || 1),
+      weight: String(propertiesData.get("weight") || "1"),
+      operation: String(propertiesData.get("operation") || "soma"),
+      properties: collectSelectionProperties(propertiesForm.closest(".criteria-properties-panel")),
+      groups
+    };
+    const savedCriteria = readSavedCriteria();
+    let existingIndex = savedCriteria.findIndex((saved) => String(saved.id) === String(criterion.id));
+
+    if (existingIndex < 0) {
+      existingIndex = savedCriteria.findIndex((saved) => saved.name.toLocaleLowerCase("pt-BR") === criterion.name.toLocaleLowerCase("pt-BR"));
+    }
+
+    if (existingIndex >= 0) {
+      criterion.id = savedCriteria[existingIndex].id;
+      savedCriteria[existingIndex] = criterion;
+    } else {
+      savedCriteria.push(criterion);
+    }
+
+    try {
+      localStorage.setItem(criteriaStorageKey, JSON.stringify(savedCriteria));
+      if (criterionSaveStatus) criterionSaveStatus.textContent = "Critério salvo com sucesso.";
+      window.location.href = "selecao-anteprojeto.html";
+    } catch {
+      if (criterionSaveStatus) {
+        criterionSaveStatus.classList.remove("sr-only");
+        criterionSaveStatus.textContent = "Não foi possível salvar o critério.";
+      }
+    }
+  });
+}
+
+if (undoCriterionButton && propertiesForm && criteriaGroups) {
+  undoCriterionButton.addEventListener("click", () => {
+    window.location.href = "selecao-anteprojeto.html";
+  });
+}
+
+const propertyTypes = [
+  { icon: "$", label: "Moeda" },
+  { icon: "▣", label: "Data" },
+  { icon: "#", label: "Inteiro" },
+  { icon: "●", label: "Seleção de localidade" },
+  { icon: ".0", label: "Número" },
+  { icon: "♜", label: "Seleção de organização" },
+  { icon: "☷", label: "Seleção" },
+  { icon: "T", label: "Texto" },
+  { icon: "↔", label: "Área de texto" },
+  { icon: "▥", label: "Seleção de unidade" },
+  { icon: "◉", label: "Chave" }
+];
+
+function closePropertyTypeMenus(exceptMenu = null) {
+  document.querySelectorAll(".property-type-menu").forEach((menu) => {
+    if (menu !== exceptMenu) menu.hidden = true;
+  });
+  document.querySelectorAll(".add-property-button").forEach((button) => {
+    if (!exceptMenu || button.parentElement?.querySelector(".property-type-menu") !== exceptMenu) {
+      button.setAttribute("aria-expanded", "false");
+    }
+  });
+}
+
+function createPropertyTypeMenu(ownerButton) {
+  const menu = document.createElement("div");
+  menu.className = "property-type-menu";
+  menu.setAttribute("role", "menu");
+  menu.hidden = true;
+
+  propertyTypes.forEach((propertyType) => {
+    const option = document.createElement("button");
+    option.type = "button";
+    option.setAttribute("role", "menuitem");
+
+    const icon = document.createElement("span");
+    icon.className = "property-type-icon";
+    icon.setAttribute("aria-hidden", "true");
+    icon.textContent = propertyType.icon;
+
+    const label = document.createElement("span");
+    label.textContent = propertyType.label;
+    option.append(icon, label);
+    option.addEventListener("click", () => {
+      if (propertyType.label === "Seleção") {
+        const destinationSection = ownerButton.closest(".criteria-group-section, .criteria-properties-panel");
+        appendSelectionProperty(destinationSection);
+      }
+      menu.hidden = true;
+      ownerButton.setAttribute("aria-expanded", "false");
+    });
+    menu.append(option);
+  });
+
+  return menu;
+}
+
+document.addEventListener("click", (event) => {
+  const addPropertyButton = event.target.closest(".add-property-button");
+
+  if (addPropertyButton) {
+    const actions = addPropertyButton.parentElement;
+    let menu = actions?.querySelector(".property-type-menu");
+
+    if (!menu && actions) {
+      menu = createPropertyTypeMenu(addPropertyButton);
+      actions.append(menu);
+    }
+
+    if (menu) {
+      const willOpen = menu.hidden;
+      closePropertyTypeMenus(menu);
+      menu.style.left = `${addPropertyButton.offsetLeft}px`;
+      menu.style.top = `${addPropertyButton.offsetTop + addPropertyButton.offsetHeight + 4}px`;
+      menu.hidden = !willOpen;
+      addPropertyButton.setAttribute("aria-expanded", String(willOpen));
+    }
+    return;
+  }
+
+  if (!event.target.closest(".property-type-menu")) closePropertyTypeMenus();
+});
