@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content="Configuração da guia de critérios da seleção de anteprojeto" />
+    <title>Guia de Critérios | Seleção de Anteprojeto</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <main class="app-shell detail-page criteria-guide-page">
+      <aside class="rail" aria-label="Navegação principal">
+        <button type="button" class="rail-button" aria-label="Início"><span aria-hidden="true">⌂</span></button>
+        <button type="button" class="rail-button" aria-label="Planos"><span aria-hidden="true">⚒</span></button>
+        <a class="rail-button" href="index.html" aria-label="Escritórios"><span aria-hidden="true">▦</span></a>
+        <button type="button" class="rail-button" aria-label="Permissões"><span aria-hidden="true">▣</span></button>
+        <button type="button" class="rail-button people-symbol" aria-label="Pessoas"><span aria-hidden="true">♟♟♟</span></button>
+        <a class="rail-button feature-rail-link active" href="selecao-anteprojeto.html" aria-current="page" aria-label="Seleção de Anteprojeto" title="Seleção de Anteprojeto" data-tooltip="Seleção de Anteprojeto">
+          <img src="icone-selecao-anteprojeto.png" alt="" aria-hidden="true" />
+        </a>
+      </aside>
+
+      <section class="workspace">
+        <header class="topbar detail-topbar">
+          <a href="index.html" class="home-icon breadcrumb-link" aria-label="Voltar para configurações">⌂</a>
+          <span class="chevron" aria-hidden="true">›</span>
+          <div class="breadcrumb-group">
+            <div class="breadcrumb-item">
+              <a class="breadcrumb breadcrumb-link" href="index.html">Configurações do Escritório</a>
+              <small>PMO-ES</small>
+            </div>
+            <span class="chevron" aria-hidden="true">›</span>
+            <div class="breadcrumb-item">
+              <a class="breadcrumb breadcrumb-link" href="selecao-anteprojeto.html">Configuração</a>
+              <small>Seleção de Anteprojeto</small>
+            </div>
+            <span class="chevron" aria-hidden="true">›</span>
+            <div class="breadcrumb-item"><span class="breadcrumb">CRITÉRIOS</span></div>
+          </div>
+        </header>
+
+        <div class="workspace-body criteria-guide-body">
+          <div class="toolbar-row criteria-guide-toolbar">
+            <h2>Guia de Critérios</h2>
+            <div class="detail-actions" aria-label="Opções de visualização">
+              <button id="collapse-all" class="double-arrow selected" type="button" aria-label="Recolher todos">⌄⌄</button>
+              <button id="expand-all" class="double-arrow" type="button" aria-label="Expandir todos">⌃⌃</button>
+              <button type="button" class="selected" aria-label="Visualização em lista" aria-pressed="true">☰</button>
+              <button type="button" aria-label="Visualização em grade" aria-pressed="false">▦</button>
+              <label><span class="sr-only">Quantidade por página</span>
+                <select aria-label="Quantidade por página"><option selected>30</option><option>60</option></select>
+              </label>
+            </div>
+          </div>
+
+          <section class="config-panel properties-panel criteria-properties-panel" aria-labelledby="properties-title">
+            <header>
+              <h2 id="properties-title">PROPRIEDADES</h2>
+              <button id="toggle-properties" type="button" aria-label="Recolher propriedades" aria-expanded="true">⌃</button>
+            </header>
+
+            <form id="properties-form" class="properties-form criteria-properties-form">
+              <label class="underline-field">
+                <span>Nome <b>*</b> <i title="Nome do critério">?</i></span>
+                <input type="text" name="name" value="Propriedades" required />
+              </label>
+              <label class="underline-field position-field">
+                <span>Posição <b>*</b> <i title="Posição de exibição">?</i></span>
+                <input type="number" name="position" value="1" min="1" required />
+              </label>
+              <label class="underline-field icon-field">
+                <span>Ícone <b>*</b> <i title="Ícone do modelo">?</i></span>
+                <span class="icon-selector"><span aria-hidden="true">⚙</span><button type="button" aria-label="Remover ícone">×</button><button type="button" aria-label="Selecionar ícone">⌄</button></span>
+              </label>
+              <label class="underline-field">
+                <span>Peso <b>*</b> <i title="Peso do critério">?</i></span>
+                <input type="text" name="weight" value="1" required />
+              </label>
+              <label class="underline-field operation-field">
+                <span>Operação <b>*</b> <i title="Operação aplicada ao critério">?</i></span>
+                <select name="operation" required><option value="soma">Soma</option><option value="media">Média</option></select>
+              </label>
+
+              <div class="properties-actions">
+                <button type="button" class="action-button">Adicionar propriedade <strong aria-hidden="true">+</strong></button>
+                <button id="add-criteria-group" type="button" class="action-button">Adicionar grupo <strong aria-hidden="true">+</strong></button>
+              </div>
+            </form>
+          </section>
+
+          <div id="criteria-groups" class="criteria-groups" aria-live="polite"></div>
+        </div>
+      </section>
+    </main>
+
+    <template id="criteria-group-template">
+      <section class="config-panel criteria-group-section">
+        <form class="criteria-group-form">
+          <label class="underline-field">
+            <span>Título <b>*</b> <i title="Título do grupo">?</i></span>
+            <input class="criteria-group-title" type="text" name="groupTitle" required />
+          </label>
+          <label class="underline-field position-field">
+            <span>Índice ord. <b>*</b> <i title="Índice de ordenação">?</i></span>
+            <input class="criteria-group-index" type="number" name="groupIndex" min="1" required />
+          </label>
+          <label class="underline-field">
+            <span>Peso <b>*</b> <i title="Peso do grupo">?</i></span>
+            <input type="text" name="groupWeight" value="1" required />
+          </label>
+          <label class="underline-field operation-field">
+            <span>Operação <b>*</b> <i title="Operação aplicada ao grupo">?</i></span>
+            <select name="groupOperation" required><option value="soma">Soma</option><option value="media">Média</option></select>
+          </label>
+          <div class="criteria-group-actions">
+            <button type="button" class="action-button">Adicionar propriedade <strong aria-hidden="true">+</strong></button>
+          </div>
+        </form>
+      </section>
+    </template>
+    <script src="script.js"></script>
+  </body>
+</html>

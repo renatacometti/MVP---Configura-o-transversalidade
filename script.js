@@ -40,23 +40,39 @@ if (toggleButton && panel && cards) toggleButton.addEventListener("click", () =>
 const expandAllButton = document.querySelector("#expand-all");
 const collapseAllButton = document.querySelector("#collapse-all");
 
-if (expandAllButton && toggleButton && panel && cards) {
+if (expandAllButton) {
   expandAllButton.addEventListener("click", () => {
-    toggleButton.setAttribute("aria-expanded", "true");
-    toggleButton.setAttribute("aria-label", "Recolher modelos");
-    toggleButton.textContent = "⌃";
-    panel.classList.remove("collapsed");
-    cards.classList.remove("cards-hidden");
+    if (toggleButton && panel && cards) {
+      toggleButton.setAttribute("aria-expanded", "true");
+      toggleButton.setAttribute("aria-label", "Recolher modelos");
+      toggleButton.textContent = "⌃";
+      panel.classList.remove("collapsed");
+      cards.classList.remove("cards-hidden");
+    }
+    if (propertiesToggle && propertiesForm) {
+      propertiesToggle.setAttribute("aria-expanded", "true");
+      propertiesToggle.setAttribute("aria-label", "Recolher propriedades");
+      propertiesToggle.textContent = "⌃";
+      propertiesForm.hidden = false;
+    }
   });
 }
 
-if (collapseAllButton && toggleButton && panel && cards) {
+if (collapseAllButton) {
   collapseAllButton.addEventListener("click", () => {
-    toggleButton.setAttribute("aria-expanded", "false");
-    toggleButton.setAttribute("aria-label", "Expandir modelos");
-    toggleButton.textContent = "⌄";
-    panel.classList.add("collapsed");
-    cards.classList.add("cards-hidden");
+    if (toggleButton && panel && cards) {
+      toggleButton.setAttribute("aria-expanded", "false");
+      toggleButton.setAttribute("aria-label", "Expandir modelos");
+      toggleButton.textContent = "⌄";
+      panel.classList.add("collapsed");
+      cards.classList.add("cards-hidden");
+    }
+    if (propertiesToggle && propertiesForm) {
+      propertiesToggle.setAttribute("aria-expanded", "false");
+      propertiesToggle.setAttribute("aria-label", "Expandir propriedades");
+      propertiesToggle.textContent = "⌄";
+      propertiesForm.hidden = true;
+    }
   });
 }
 
@@ -151,3 +167,23 @@ document.querySelectorAll(".section-toggle").forEach((toggle) => {
     toggle.setAttribute("aria-label", `${enabled ? "Desabilitar" : "Habilitar"} ${sectionName}`);
   });
 });
+
+const addCriteriaGroupButton = document.querySelector("#add-criteria-group");
+const criteriaGroups = document.querySelector("#criteria-groups");
+const criteriaGroupTemplate = document.querySelector("#criteria-group-template");
+
+if (addCriteriaGroupButton && criteriaGroups && criteriaGroupTemplate) {
+  addCriteriaGroupButton.addEventListener("click", () => {
+    const groupNumber = criteriaGroups.children.length + 1;
+    const group = criteriaGroupTemplate.content.cloneNode(true);
+    const section = group.querySelector(".criteria-group-section");
+    const titleInput = group.querySelector(".criteria-group-title");
+    const indexInput = group.querySelector(".criteria-group-index");
+
+    if (section) section.setAttribute("aria-label", `Grupo ${groupNumber}`);
+    if (titleInput) titleInput.value = `Grupo ${groupNumber}`;
+    if (indexInput) indexInput.value = String(groupNumber);
+
+    criteriaGroups.append(group);
+  });
+}
