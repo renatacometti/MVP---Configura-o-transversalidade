@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="description" content="Configuração da guia de critérios da seleção de anteprojeto" />
-    <title>Guia de Critérios | Seleção de Anteprojeto</title>
+    <title>Nova Guia de Critérios | Seleção de Anteprojeto</title>
     <link rel="stylesheet" href="styles.css" />
   </head>
   <body>
@@ -41,7 +41,7 @@
 
         <div class="workspace-body criteria-guide-body">
           <div class="toolbar-row criteria-guide-toolbar">
-            <h2>Guia de Critérios</h2>
+            <h2>Nova Guia de Critérios</h2>
             <div class="detail-actions" aria-label="Opções de visualização">
               <button id="collapse-all" class="double-arrow selected" type="button" aria-label="Recolher todos">⌄⌄</button>
               <button id="expand-all" class="double-arrow" type="button" aria-label="Expandir todos">⌃⌃</button>
@@ -80,7 +80,6 @@
                 <span>Operação <b>*</b> <i title="Operação aplicada ao critério">?</i></span>
                 <select name="operation" required><option value="soma">Soma</option><option value="media">Média</option></select>
               </label>
-
               <div class="properties-actions">
                 <button type="button" class="action-button add-property-button" aria-haspopup="menu" aria-expanded="false">Adicionar propriedade <strong aria-hidden="true">+</strong></button>
                 <button id="add-criteria-group" type="button" class="action-button">Adicionar grupo <strong aria-hidden="true">+</strong></button>
@@ -118,6 +117,18 @@
             <span>Operação <b>*</b> <i title="Operação aplicada ao grupo">?</i></span>
             <select name="groupOperation" required><option value="soma">Soma</option><option value="media">Média</option></select>
           </label>
+          <label class="group-enable-key-field">
+            <input type="checkbox" name="groupEnableKey" />
+            <span>Chave Habilitação</span> <i title="Habilitar a chave do grupo">?</i>
+          </label>
+          <label class="underline-field">
+            <span>Valor <i title="Valor da chave de habilitação">?</i></span>
+            <input type="text" name="groupEnableValue" />
+          </label>
+          <label class="underline-field">
+            <span>Legenda <i title="Legenda da chave de habilitação">?</i></span>
+            <input type="text" name="groupEnableLabel" />
+          </label>
           <div class="criteria-group-actions">
             <button type="button" class="action-button add-property-button" aria-haspopup="menu" aria-expanded="false">Adicionar propriedade <strong aria-hidden="true">+</strong></button>
           </div>
@@ -126,18 +137,18 @@
     </template>
 
     <template id="selection-property-template">
-      <section class="criteria-selection-property" aria-label="Propriedade do tipo Seleção">
+      <section class="criteria-selection-property" aria-label="Propriedade do tipo Seleção Multivalor">
         <header>
           <span class="selection-property-icon" aria-hidden="true">☷</span>
-          <span>( Seleção )</span>
+          <span>( Seleção Multivalor )</span>
           <div class="selection-property-controls">
-            <button type="button" class="delete-selection-property" aria-label="Excluir propriedade Seleção">🗑</button>
+            <button type="button" class="delete-selection-property" aria-label="Excluir propriedade Seleção Multivalor">🗑</button>
             <label class="toggle-control">
               <span class="sr-only">Propriedade habilitada</span>
-              <input class="selection-property-enabled" type="checkbox" checked aria-label="Habilitar propriedade Seleção" />
+              <input class="selection-property-enabled" type="checkbox" checked aria-label="Habilitar propriedade Seleção Multivalor" />
               <span class="toggle-track" aria-hidden="true"><span></span></span>
             </label>
-            <button type="button" class="toggle-selection-property" aria-label="Recolher propriedade Seleção" aria-expanded="true">⌃</button>
+            <button type="button" class="toggle-selection-property" aria-label="Recolher propriedade Seleção Multivalor" aria-expanded="true">⌃</button>
           </div>
         </header>
 
@@ -155,7 +166,7 @@
             <input type="number" name="selectionIndex" value="3" min="1" />
           </label>
           <div class="underline-field selection-values-field">
-            <span>Possíveis valores <b>*</b> <i title="Valores disponíveis para seleção">?</i></span>
+            <span>Possíveis Opções <b>*</b> <i title="Valores disponíveis para seleção">?</i></span>
             <span class="selection-values-control">
               <span class="selection-values-summary">2 valores configurados</span>
               <button type="button" class="add-selection-value" aria-label="Adicionar possível valor">+</button>
@@ -186,19 +197,60 @@
       </section>
     </template>
 
+    <template id="list-property-template">
+      <section class="criteria-list-property">
+        <header>
+          <span class="selection-property-icon list-property-icon" aria-hidden="true">≡</span>
+          <span class="list-property-title">( Lista )</span>
+          <div class="selection-property-controls">
+            <button type="button" class="delete-list-property" aria-label="Excluir propriedade">🗑</button>
+            <label class="toggle-control">
+              <span class="sr-only">Propriedade habilitada</span>
+              <input class="list-property-enabled" type="checkbox" checked aria-label="Habilitar propriedade" />
+              <span class="toggle-track" aria-hidden="true"><span></span></span>
+            </label>
+            <button type="button" class="toggle-list-property" aria-label="Recolher propriedade" aria-expanded="true">⌃</button>
+          </div>
+        </header>
+
+        <form class="list-property-form">
+          <label class="underline-field">
+            <span>Nome <b>*</b> <i title="Nome da propriedade">?</i></span>
+            <input type="text" name="listName" required />
+          </label>
+          <label class="underline-field">
+            <span>Legenda <b>*</b> <i title="Legenda da propriedade">?</i></span>
+            <input type="text" name="listLabel" required />
+          </label>
+          <label class="underline-field position-field">
+            <span>Índice de Ordenação <i title="Índice de ordenação">?</i></span>
+            <input type="number" name="listIndex" value="3" min="1" />
+          </label>
+          <label class="underline-field">
+            <span>Valor <b>*</b> <i title="Valor da propriedade">?</i></span>
+            <input type="text" name="listValue" required />
+          </label>
+          <label class="underline-field">
+            <span>Peso <b>*</b> <i title="Peso da propriedade">?</i></span>
+            <input type="text" name="listWeight" value="1" required />
+          </label>
+        </form>
+      </section>
+    </template>
+
     <dialog id="possible-values-dialog" class="possible-values-dialog" aria-labelledby="possible-values-title">
       <form id="possible-values-form" method="dialog">
         <header>
           <div>
-            <h2 id="possible-values-title">Possíveis valores</h2>
-            <p>Cadastre o label exibido e sua respectiva nota.</p>
+            <h2 id="possible-values-title">Possíveis Opções</h2>
+            <p>Cadastre o rótulo exibido e seu respectivo valor.</p>
           </div>
-          <button id="close-possible-values" type="button" aria-label="Fechar possíveis valores">×</button>
+          <button id="close-possible-values" type="button" aria-label="Fechar possíveis opções">×</button>
         </header>
 
         <div class="possible-values-table">
           <div class="possible-values-table-header" aria-hidden="true">
-            <span>LABEL</span><span>NOTA</span><span>AÇÕES</span>
+            <span>RÓTULO</span><span>VALOR</span><span>AÇÕES</span>
           </div>
           <div id="possible-values-rows" class="possible-values-rows"></div>
           <div id="possible-values-empty" class="possible-values-empty">

@@ -172,10 +172,16 @@ const addCriteriaGroupButton = document.querySelector("#add-criteria-group");
 const criteriaGroups = document.querySelector("#criteria-groups");
 const criteriaGroupTemplate = document.querySelector("#criteria-group-template");
 const selectionPropertyTemplate = document.querySelector("#selection-property-template");
+const listPropertyTemplate = document.querySelector("#list-property-template");
 
 function directSelectionProperties(container) {
   if (!container) return [];
   return [...container.children].filter((child) => child.classList.contains("criteria-selection-property"));
+}
+
+function directListProperties(container) {
+  if (!container) return [];
+  return [...container.children].filter((child) => child.classList.contains("criteria-list-property"));
 }
 
 function parsePossibleValues(rawValue) {
@@ -224,17 +230,17 @@ function renderPossibleValues() {
     const labelInput = document.createElement("input");
     labelInput.type = "text";
     labelInput.value = possibleValue.label;
-    labelInput.placeholder = "Label";
+    labelInput.placeholder = "Rótulo";
     labelInput.required = true;
-    labelInput.setAttribute("aria-label", `Label do valor ${index + 1}`);
+    labelInput.setAttribute("aria-label", `Rótulo da opção ${index + 1}`);
 
     const scoreInput = document.createElement("input");
     scoreInput.type = "number";
     scoreInput.step = "any";
     scoreInput.value = possibleValue.score;
-    scoreInput.placeholder = "Nota";
+    scoreInput.placeholder = "Valor";
     scoreInput.required = true;
-    scoreInput.setAttribute("aria-label", `Nota do valor ${index + 1}`);
+    scoreInput.setAttribute("aria-label", `Valor da opção ${index + 1}`);
 
     const deleteButton = document.createElement("button");
     deleteButton.type = "button";
@@ -320,7 +326,7 @@ function appendSelectionProperty(container, propertyData = {}) {
   toggleButton?.addEventListener("click", () => {
     const expanded = toggleButton.getAttribute("aria-expanded") === "true";
     toggleButton.setAttribute("aria-expanded", String(!expanded));
-    toggleButton.setAttribute("aria-label", expanded ? "Expandir propriedade Seleção" : "Recolher propriedade Seleção");
+    toggleButton.setAttribute("aria-label", expanded ? "Expandir propriedade Seleção Multivalor" : "Recolher propriedade Seleção Multivalor");
     toggleButton.textContent = expanded ? "⌄" : "⌃";
     section.classList.toggle("is-collapsed", expanded);
   });
@@ -352,6 +358,93 @@ function collectSelectionProperties(container) {
   });
 }
 
+const listPropertyTypes = {
+  "challenge-list": { label: "Lista de Desafios", icon: "≡" },
+  "ods-list": { label: "Lista de ODS", icon: "◎" }
+};
+
+function appendListProperty(container, propertyType, propertyData = {}) {
+  if (!container || !listPropertyTemplate || !listPropertyTypes[propertyType]) return;
+
+  const typeDetails = listPropertyTypes[propertyType];
+  const property = listPropertyTemplate.content.cloneNode(true);
+  const section = property.querySelector(".criteria-list-property");
+  const form = property.querySelector(".list-property-form");
+  const icon = property.querySelector(".list-property-icon");
+  const title = property.querySelector(".list-property-title");
+  const enabledInput = property.querySelector(".list-property-enabled");
+  const deleteButton = property.querySelector(".delete-list-property");
+  const toggleButton = property.querySelector(".toggle-list-property");
+
+  if (!section || !form) return;
+
+  section.dataset.propertyType = propertyType;
+  section.setAttribute("aria-label", `Propriedade do tipo ${typeDetails.label}`);
+  if (icon) icon.textContent = typeDetails.icon;
+  if (title) title.textContent = `( ${typeDetails.label} )`;
+  if (deleteButton) deleteButton.setAttribute("aria-label", `Excluir propriedade ${typeDetails.label}`);
+  if (enabledInput) {
+    enabledInput.checked = propertyData.enabled !== false;
+    enabledInput.setAttribute("aria-label", `Habilitar propriedade ${typeDetails.label}`);
+  }
+  if (toggleButton) toggleButton.setAttribute("aria-label", `Recolher propriedade ${typeDetails.label}`);
+
+  form.elements.namedItem("listName").value = propertyData.name || "";
+  form.elements.namedItem("listLabel").value = propertyData.label || "";
+  form.elements.namedItem("listIndex").value = String(propertyData.index || 3);
+  form.elements.namedItem("listValue").value = propertyData.value || "";
+  form.elements.namedItem("listWeight").value = propertyData.weight || "1";
+
+  deleteButton?.addEventListener("click", () => section.remove());
+  enabledInput?.addEventListener("change", () => section.classList.toggle("is-disabled", !enabledInput.checked));
+  toggleButton?.addEventListener("click", () => {
+    const expanded = toggleButton.getAttribute("aria-expanded") === "true";
+    toggleButton.setAttribute("aria-expanded", String(!expanded));
+    toggleButton.setAttribute("aria-label", expanded ? `Expandir propriedade ${typeDetails.label}` : `Recolher propriedade ${typeDetails.label}`);
+    toggleButton.textContent = expanded ? "⌄" : "⌃";
+    section.classList.toggle("is-collapsed", expanded);
+  });
+
+  section.classList.toggle("is-disabled", enabledInput ? !enabledInput.checked : false);
+  container.append(property);
+}
+
+function collectListProperties(container) {
+  return directListProperties(container).map((section) => {
+    const form = section.querySelector(".list-property-form");
+    const data = new FormData(form);
+    return {
+      type: section.dataset.propertyType,
+      enabled: section.querySelector(".list-property-enabled")?.checked !== false,
+      name: String(data.get("listName") || ""),
+      label: String(data.get("listLabel") || ""),
+      index: Number(data.get("listIndex") || 3),
+      value: String(data.get("listValue") || ""),
+      weight: String(data.get("listWeight") || "1")
+    };
+  });
+}
+
+function appendPropertyFromData(container, propertyData = {}) {
+  if (listPropertyTypes[propertyData.type]) {
+    appendListProperty(container, propertyData.type, propertyData);
+    return;
+  }
+  appendSelectionProperty(container, propertyData);
+}
+
+function collectProperties(container) {
+  const selectionSections = directSelectionProperties(container);
+  const listSections = directListProperties(container);
+  const selectionData = collectSelectionProperties(container);
+  const listData = collectListProperties(container);
+  const selectionProperties = new Map(selectionSections.map((section, index) => [section, selectionData[index]]));
+  const listProperties = new Map(listSections.map((section, index) => [section, listData[index]]));
+  return [...container.children]
+    .filter((section) => selectionProperties.has(section) || listProperties.has(section))
+    .map((section) => selectionProperties.get(section) || listProperties.get(section));
+}
+
 function appendCriteriaGroup(groupData = {}) {
   if (!criteriaGroups || !criteriaGroupTemplate) return;
 
@@ -362,13 +455,19 @@ function appendCriteriaGroup(groupData = {}) {
   const indexInput = group.querySelector(".criteria-group-index");
   const weightInput = group.querySelector('[name="groupWeight"]');
   const operationInput = group.querySelector('[name="groupOperation"]');
+  const enableKeyInput = group.querySelector('[name="groupEnableKey"]');
+  const enableValueInput = group.querySelector('[name="groupEnableValue"]');
+  const enableLabelInput = group.querySelector('[name="groupEnableLabel"]');
 
   if (section) section.setAttribute("aria-label", `Grupo ${groupNumber}`);
   if (titleInput) titleInput.value = groupData.title || `Grupo ${groupNumber}`;
   if (indexInput) indexInput.value = String(groupData.index || groupNumber);
   if (weightInput) weightInput.value = groupData.weight || "1";
   if (operationInput) operationInput.value = groupData.operation || "soma";
-  (groupData.properties || []).forEach((propertyData) => appendSelectionProperty(section, propertyData));
+  if (enableKeyInput) enableKeyInput.checked = Boolean(groupData.enableKey);
+  if (enableValueInput) enableValueInput.value = groupData.enableValue || "";
+  if (enableLabelInput) enableLabelInput.value = groupData.enableLabel || "";
+  (groupData.properties || []).forEach((propertyData) => appendPropertyFromData(section, propertyData));
 
   criteriaGroups.append(group);
 }
@@ -400,7 +499,8 @@ function loadCriterionIntoForm(criterion) {
   propertiesForm.elements.namedItem("operation").value = criterion.operation || "soma";
   const propertiesPanel = propertiesForm.closest(".criteria-properties-panel");
   directSelectionProperties(propertiesPanel).forEach((property) => property.remove());
-  (criterion.properties || []).forEach((propertyData) => appendSelectionProperty(propertiesPanel, propertyData));
+  directListProperties(propertiesPanel).forEach((property) => property.remove());
+  (criterion.properties || []).forEach((propertyData) => appendPropertyFromData(propertiesPanel, propertyData));
   criteriaGroups.replaceChildren();
   (criterion.groups || []).forEach((group) => appendCriteriaGroup(group));
 }
@@ -535,7 +635,7 @@ const criterionSaveStatus = document.querySelector("#criterion-save-status");
 
 if (saveCriterionButton && propertiesForm && criteriaGroups) {
   saveCriterionButton.addEventListener("click", () => {
-    const forms = [propertiesForm, ...criteriaGroups.querySelectorAll(".criteria-group-form"), ...document.querySelectorAll(".selection-property-form")];
+    const forms = [propertiesForm, ...criteriaGroups.querySelectorAll(".criteria-group-form"), ...document.querySelectorAll(".selection-property-form, .list-property-form")];
     const invalidForm = forms.find((form) => !form.checkValidity());
 
     if (invalidForm) {
@@ -552,7 +652,10 @@ if (saveCriterionButton && propertiesForm && criteriaGroups) {
         index: Number(groupData.get("groupIndex") || 1),
         weight: String(groupData.get("groupWeight") || "1"),
         operation: String(groupData.get("groupOperation") || "soma"),
-        properties: collectSelectionProperties(groupSection)
+        enableKey: groupData.has("groupEnableKey"),
+        enableValue: String(groupData.get("groupEnableValue") || ""),
+        enableLabel: String(groupData.get("groupEnableLabel") || ""),
+        properties: collectProperties(groupSection)
       };
     });
     const criterion = {
@@ -561,7 +664,7 @@ if (saveCriterionButton && propertiesForm && criteriaGroups) {
       position: Number(propertiesData.get("position") || 1),
       weight: String(propertiesData.get("weight") || "1"),
       operation: String(propertiesData.get("operation") || "soma"),
-      properties: collectSelectionProperties(propertiesForm.closest(".criteria-properties-panel")),
+      properties: collectProperties(propertiesForm.closest(".criteria-properties-panel")),
       groups
     };
     const savedCriteria = readSavedCriteria();
@@ -604,10 +707,12 @@ const propertyTypes = [
   { icon: "●", label: "Seleção de localidade" },
   { icon: ".0", label: "Número" },
   { icon: "♜", label: "Seleção de organização" },
-  { icon: "☷", label: "Seleção" },
+  { icon: "☷", label: "Seleção Multivalor" },
   { icon: "T", label: "Texto" },
   { icon: "↔", label: "Área de texto" },
   { icon: "▥", label: "Seleção de unidade" },
+  { icon: "≡", label: "Lista de Desafios" },
+  { icon: "◎", label: "Lista de ODS" },
   { icon: "◉", label: "Chave" }
 ];
 
@@ -642,9 +747,13 @@ function createPropertyTypeMenu(ownerButton) {
     label.textContent = propertyType.label;
     option.append(icon, label);
     option.addEventListener("click", () => {
-      if (propertyType.label === "Seleção") {
+      if (propertyType.label === "Seleção Multivalor") {
         const destinationSection = ownerButton.closest(".criteria-group-section, .criteria-properties-panel");
         appendSelectionProperty(destinationSection);
+      } else if (propertyType.label === "Lista de Desafios" || propertyType.label === "Lista de ODS") {
+        const destinationSection = ownerButton.closest(".criteria-group-section, .criteria-properties-panel");
+        const listType = propertyType.label === "Lista de Desafios" ? "challenge-list" : "ods-list";
+        appendListProperty(destinationSection, listType);
       }
       menu.hidden = true;
       ownerButton.setAttribute("aria-expanded", "false");
